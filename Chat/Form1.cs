@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.Odbc;
-using System.Linq;
 using System.Windows.Forms;
 using RethinkDb.Driver;
-using RethinkDb.Driver.Model;
-using RethinkDb.Driver.Net;
 using RethinkDb.Driver.Net.Clustering;
 
 namespace Chat
@@ -27,31 +22,25 @@ namespace Chat
 
 
             //Stablish connection to RethinkDB Server that is running on Raspberr
-
             var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
-
             conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0,1,0), EpsilonCalculator.Linear())).Discover(true);
 
             pool = conn.Connect();
-            //Connection conn = r.Connection().Hostname("192.168.1.184").Port(28015).Db("chattable").Connect();
 
             //Get all messages from RethinkDB
-            //r.Table("chattable").Insert(date:DateTime.Now, username:"John Doe", mensagem:"Yo yo, waddup waddup");
+            var all_messages = r.Db("chat").Table("chattable").Run(pool);
 
-
-            //Get all previous message records
-
+            DataTable dt = new DataTable();
             //Load all previous messages to the listbox of messages
-
-            /*DataTable dt = new DataTable();
-            dt.load(cmd.executereader());
-            list<datarow> drlist = dt.asenumerable().tolist();
-            foreach (datarow str in drlist)
+            foreach (var message in all_messages)
             {
-                // mensagem mensagem = new mensagem(date, "select mensagem from [folha1$]", "select username from [folha1$]"); ;
-                string msgem = "(" + str.itemarray[3].tostring() + ") " + str.itemarray[1].tostring() + ": " + str.itemarray[2].tostring();
-                lb_chat.items.add(msgem);
-            }*/
+                //Getting Date in Epoch format
+                double date = message.GetValue("Data").GetValue("epoch_time");
+                //Create message
+                string msgem = "(" + new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(date) + ") " + message.GetValue("Username") + ": " + message.GetValue("Msg");
+                //Adding Message to Listbox
+                lb_chat.Items.Add(msgem);
+            }
 
             //Scroll to the last entry
             if (lb_chat.Items.Count != 0)
@@ -59,7 +48,6 @@ namespace Chat
                 lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
                 lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
             }
-
         }
 
         private void Textbox_KeyDown(object sender, KeyEventArgs e)
@@ -87,10 +75,10 @@ namespace Chat
 
                     string username = tb_username.Text;
                     string message_text = tb_mensagem.Text;
-                    lb_username.Text = username;
                     Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text};
                     lb_chat.Items.Add(mensagem);
                     tb_mensagem.Text = "";
+                    lb_username.Text = username;
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
 
