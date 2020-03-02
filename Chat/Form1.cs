@@ -5,6 +5,7 @@ using System.Data.Odbc;
 using System.Linq;
 using System.Windows.Forms;
 using RethinkDb.Driver;
+using RethinkDb.Driver.Model;
 using RethinkDb.Driver.Net;
 using RethinkDb.Driver.Net.Clustering;
 
@@ -13,6 +14,8 @@ namespace Chat
     public partial class Form1 : Form
     {
         public static RethinkDB r = RethinkDB.R;
+        public ConnectionPool pool;
+
 
         public Form1()
         {
@@ -24,23 +27,13 @@ namespace Chat
 
 
             //Stablish connection to RethinkDB Server that is running on Raspberr
-            try
-            {
-                var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015" });
 
-                conn.PoolingStrategy(new RoundRobinHostPool(new TimeSpan(0,1,0),new TimeSpan(0, 1, 0))).Discover(true);
+            var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
 
-                ConnectionPool pool = conn.Connect();
-                var result = r.Now().Run<DateTimeOffset>(pool);
-                //var result = r.Now().Run<DateTimeOffset>(conn);
-                //Connection conn = r.Connection().Hostname("192.168.1.184").Port(28015).Db("chattable").Connect();
-                
-            }
-            catch (Exception ex)
-            {
-                
-            }
+            conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0,1,0), EpsilonCalculator.Linear())).Discover(true);
 
+            pool = conn.Connect();
+            //Connection conn = r.Connection().Hostname("192.168.1.184").Port(28015).Db("chattable").Connect();
 
             //Get all messages from RethinkDB
             //r.Table("chattable").Insert(date:DateTime.Now, username:"John Doe", mensagem:"Yo yo, waddup waddup");
@@ -92,20 +85,20 @@ namespace Chat
                 {
                     //Get the Id of the last message sent
 
-
-                    Mensagem mensagem = new Mensagem(DateTime.Now, tb_mensagem.Text, tb_username.Text);
-                    lb_chat.Items.Add(mensagem);
-                    //id_message_my_file = id_message_my_file + 1;
-                    //id_message_outside_file = id_message_outside_file + 1;
                     string username = tb_username.Text;
                     string message_text = tb_mensagem.Text;
                     lb_username.Text = username;
+                    Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text};
+                    lb_chat.Items.Add(mensagem);
                     tb_mensagem.Text = "";
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
 
-                    //Writing on the database                    
-                }
+                    //Writing on the database    
+                    r.Db("chat").Table("chattable").Insert(mensagem).Run(pool);
+
+
+                    }
             }
         }
         private void lb_chat_DoubleClick(object sender, EventArgs e)

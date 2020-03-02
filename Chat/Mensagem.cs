@@ -9,9 +9,9 @@ namespace Chat
     public partial class Mensagem
 
     {
-        DateTime Data;
-        String Msg;
-        String Username;
+        public DateTime Data;
+        public String Msg;
+        public String Username;
        
 
         public Mensagem()
