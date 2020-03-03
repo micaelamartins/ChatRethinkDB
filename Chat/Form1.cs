@@ -3,6 +3,9 @@ using System.Data;
 using System.Windows.Forms;
 using RethinkDb.Driver;
 using RethinkDb.Driver.Net.Clustering;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Chat
 {
@@ -19,25 +22,22 @@ namespace Chat
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-
             //Stablish connection to RethinkDB Server that is running on Raspberr
             var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
-            conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0,1,0), EpsilonCalculator.Linear())).Discover(true);
+            conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
 
             pool = conn.Connect();
 
             //Get all messages from RethinkDB
-            var all_messages = r.Db("chat").Table("chattable").Run(pool);
+            List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
+
 
             DataTable dt = new DataTable();
             //Load all previous messages to the listbox of messages
             foreach (var message in all_messages)
             {
-                //Getting Date in Epoch format
-                double date = message.GetValue("Data").GetValue("epoch_time");
                 //Create message
-                string msgem = "(" + new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(date) + ") " + message.GetValue("Username") + ": " + message.GetValue("Msg");
+                string msgem = "(" + message.Data + ") " + message.Username + ": " + message.Msg;
                 //Adding Message to Listbox
                 lb_chat.Items.Add(msgem);
             }
@@ -49,6 +49,7 @@ namespace Chat
                 lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
             }
         }
+
 
         private void Textbox_KeyDown(object sender, KeyEventArgs e)
         {
@@ -71,22 +72,24 @@ namespace Chat
                 //if everything is ok successfully send and save message
                 else
                 {
-                    //Get the Id of the last message sent
-
+                    //getting the information to a variable
                     string username = tb_username.Text;
                     string message_text = tb_mensagem.Text;
-                    Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text};
+                    //Creating a message
+                    Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text };
+
+                    //Writing the message on the Listbox
                     lb_chat.Items.Add(mensagem);
-                    tb_mensagem.Text = "";
-                    lb_username.Text = username;
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
                     lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
 
-                    //Writing on the database    
-                    r.Db("chat").Table("chattable").Insert(mensagem).Run(pool);
+                    //Writing the message on the Database    
+                    r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text }).Run(pool);
 
-
-                    }
+                    //Clean up
+                    tb_mensagem.Text = "";
+                    lb_username.Text = username;
+                }
             }
         }
         private void lb_chat_DoubleClick(object sender, EventArgs e)
@@ -94,7 +97,16 @@ namespace Chat
             //Check if message was sent by user
             //Allows to delete
         }
-
+        public static async Task HandleUpdates(ConnectionPool pool)
+        {
+            var feed = await r.Db("chat").Table("chattable").Changes().RunChangesAsync<Mensagem>(pool);
+            foreach (var message in feed)
+            {
+                //Create message
+                string msgem = "(" + message.NewValue.Data + ") " + message.NewValue.Username + ": " + message.NewValue.Msg;
+            }
+        }
     }
 }
+
 
