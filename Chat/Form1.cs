@@ -6,6 +6,7 @@ using RethinkDb.Driver.Net.Clustering;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Chat
 {
@@ -13,7 +14,6 @@ namespace Chat
     {
         public static RethinkDB r = RethinkDB.R;
         public ConnectionPool pool;
-
 
         public Form1()
         {
@@ -48,6 +48,9 @@ namespace Chat
                 lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
                 lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
             }
+
+            //Calling and running the task
+            Task.Run(() => HandleUpdates(pool,lb_chat));
         }
 
 
@@ -97,13 +100,26 @@ namespace Chat
             //Check if message was sent by user
             //Allows to delete
         }
-        public static async Task HandleUpdates(ConnectionPool pool)
+        public static async Task HandleUpdates(ConnectionPool pool, ListBox lb_chat)
         {
+            //Create a feed that waits for a new message to reach the database
             var feed = await r.Db("chat").Table("chattable").Changes().RunChangesAsync<Mensagem>(pool);
+            //Take the feed and create a message
             foreach (var message in feed)
             {
                 //Create message
                 string msgem = "(" + message.NewValue.Data + ") " + message.NewValue.Username + ": " + message.NewValue.Msg;
+                try
+                {
+                    //Invoke listbox from the Form to the thread to be able to use it
+                    lb_chat.Invoke(new Action(() => lb_chat.Items.Add(msgem)));
+                    lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, true)));
+                    lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, false)));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
     }

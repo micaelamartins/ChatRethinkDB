@@ -90,7 +90,7 @@
             // tb_username
             // 
             this.tb_username.Location = new System.Drawing.Point(210, 34);
-            this.tb_username.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tb_username.Margin = new System.Windows.Forms.Padding(4);
             this.tb_username.Name = "tb_username";
             this.tb_username.Size = new System.Drawing.Size(132, 22);
             this.tb_username.TabIndex = 6;
@@ -108,6 +108,7 @@
             this.Controls.Add(this.lb_chat);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(559, 666);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
