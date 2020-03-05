@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,15 +19,26 @@ namespace Chat
         public static RethinkDB r = RethinkDB.R;
         public ConnectionPool pool;
 
+
         public Login()
         {
             InitializeComponent();
         }
 
+        //Login
         private void button1_Click(object sender, EventArgs e)
         {
             string username = textbox_username.Text;
             string password = textbox_password.Text;
+
+            byte[] hash;
+            using (SHA256CryptoServiceProvider sha256 = new SHA256CryptoServiceProvider())
+            {
+                byte[] hashdata = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                hash = hashdata;
+            }
+
+            string result = System.Text.Encoding.UTF8.GetString(hash);
 
             List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
             bool cont = false;
@@ -34,17 +46,19 @@ namespace Chat
             foreach (var us in all_users)
             {
                 string use = us.Username;
-                if (use.ToString().Contains(textbox_username.Text))
+                string pwd = us.Password;
+                if (use.ToString().Equals(textbox_username.Text) && pwd.ToString().Equals(result))
                 {
                     cont = true;
-                    Chat ga = new Chat();
+                    Chat ga = new Chat(textbox_username.Text);
                     ga.ShowDialog();
                     break;
                 }
+
             }
             if (cont == false)
             {
-                MessageBox.Show("Não está Registado!");
+                MessageBox.Show("Dados incorretos ou não está Registado!");
             }
         }
 
@@ -55,10 +69,20 @@ namespace Chat
             pool = conn.Connect();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+
+
+        private void button_registo_Click(object sender, EventArgs e)
         {
             string username = textbox_username.Text;
             string password = textbox_password.Text;
+
+            byte[] hash;
+            using (SHA256CryptoServiceProvider sha256 = new SHA256CryptoServiceProvider())
+            {
+                byte[] hashdata = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                hash = hashdata;
+            }
+            string result = System.Text.Encoding.UTF8.GetString(hash);
 
             List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
 
@@ -66,9 +90,12 @@ namespace Chat
 
             foreach (var us in all_users)
             {
+
                 string use = us.Username;
-                if (use.ToString().Contains(textbox_username.Text))
+
+                if (use.ToString().Equals(textbox_username.Text))
                 {
+                
                     cont = false;
                     MessageBox.Show("Ja existe o Username!");
 
@@ -78,8 +105,10 @@ namespace Chat
 
             if (cont == true)
             {
-                r.Db("chat").Table("users").Insert(new Users { Username = username, Password = password }).Run(pool);
-                lb_alert.Text = "Registo efetuado com sucesso!";
+
+
+                r.Db("chat").Table("users").Insert(new Users { Username = username, Password = result }).Run(pool);
+                lb_alert.Text = result;
             }
         }
     }

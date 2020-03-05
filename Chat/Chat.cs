@@ -13,9 +13,11 @@ namespace Chat
         public static RethinkDB r = RethinkDB.R;
         public ConnectionPool pool;
 
-        public Chat()
+        public Chat(string text)
         {
             InitializeComponent();
+            lb_username.Text = text;
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -27,6 +29,8 @@ namespace Chat
 
             //Get all messages from RethinkDB
             List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
+            
+
 
 
             //Load all previous messages to the listbox of messages
@@ -56,28 +60,28 @@ namespace Chat
                     tb_mensagem.AppendText(Environment.NewLine);
                 }
                 //if there is no username available enter will warn that it needs a username
-                else if (tb_username.Text.Length == 0)
-                {
-                    MessageBox.Show("Preencha todos os campos");
-                }
+               
                 //if message textbox is empty it wont do anything
                 else if (string.IsNullOrWhiteSpace(tb_mensagem.Text)) ;
                 //if everything is ok successfully send and save message
                 else
                 {
                     //getting the information to a variable
-                    string username = tb_username.Text;
+                    string username = lb_username.Text;
+                    
                     string message_text = tb_mensagem.Text;
                     //Creating a message
-                    Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text };
+                    Mensagem mensagem = new Mensagem { Data = DateTime.Now,  Msg = message_text };
                     focus_last_message();
 
                     //Writing the message on the Database    
-                    r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text }).Run(pool);
+                    r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username= username, Msg = message_text }).Run(pool);
 
                     //Clean up
                     tb_mensagem.Text = "";
-                    lb_username.Text = username;
+                    
+
+
                 }
             }
         }
@@ -91,7 +95,7 @@ namespace Chat
             {
                 if (message.NewValue != null)
                 {
-                    Mensagem msg = new Mensagem(message.NewValue.Id, message.NewValue.Data, message.NewValue.Username, message.NewValue.Msg);
+                    Mensagem msg = new Mensagem(message.NewValue.Id, message.NewValue.Data, message.NewValue.Username , message.NewValue.Msg);
                     try
                     {
                         //Invoke listbox from the Form to the thread to be able to use it
@@ -123,9 +127,9 @@ namespace Chat
                 //Check if message was sent by user
                 Mensagem msg = lb_chat.SelectedItem as Mensagem;
                 //Allows to delete if message belongs to user
-                if (msg.Username == lb_username.Text)
-                {
-                    DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete this message?" + "\n" + "\n" + msg.Username + ": " + msg.Msg, "DELETE MESSAGE", MessageBoxButtons.YesNo);
+              //  if (msg.Username == lb_username.Text)
+                //{
+                    DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete this message?" + "\n" + "\n" + ": " + msg.Msg, "DELETE MESSAGE", MessageBoxButtons.YesNo);
 
                     if (dialogResult == DialogResult.Yes)
                     {
@@ -133,7 +137,7 @@ namespace Chat
                         r.Db("chat").Table("chattable").Get(msg.Id).Delete().Run(pool);
 
                     }
-                }
+                //}
             }
         }
 

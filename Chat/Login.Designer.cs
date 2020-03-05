@@ -41,46 +41,41 @@
             // 
             // textbox_username
             // 
-            this.textbox_username.Location = new System.Drawing.Point(115, 174);
-            this.textbox_username.Margin = new System.Windows.Forms.Padding(4);
+            this.textbox_username.Location = new System.Drawing.Point(86, 141);
             this.textbox_username.Name = "textbox_username";
-            this.textbox_username.Size = new System.Drawing.Size(201, 22);
+            this.textbox_username.Size = new System.Drawing.Size(152, 20);
             this.textbox_username.TabIndex = 0;
             // 
             // textbox_password
             // 
-            this.textbox_password.Location = new System.Drawing.Point(115, 224);
-            this.textbox_password.Margin = new System.Windows.Forms.Padding(4);
+            this.textbox_password.Location = new System.Drawing.Point(86, 182);
             this.textbox_password.Name = "textbox_password";
-            this.textbox_password.Size = new System.Drawing.Size(201, 22);
+            this.textbox_password.Size = new System.Drawing.Size(152, 20);
             this.textbox_password.TabIndex = 1;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(34, 227);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(26, 184);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(73, 17);
+            this.label3.Size = new System.Drawing.Size(56, 13);
             this.label3.TabIndex = 4;
             this.label3.Text = "Password:";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(34, 174);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(26, 141);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 17);
+            this.label2.Size = new System.Drawing.Size(58, 13);
             this.label2.TabIndex = 5;
             this.label2.Text = "Username:";
             // 
             // button_entrar
             // 
-            this.button_entrar.Location = new System.Drawing.Point(235, 314);
-            this.button_entrar.Margin = new System.Windows.Forms.Padding(4);
+            this.button_entrar.Location = new System.Drawing.Point(176, 255);
             this.button_entrar.Name = "button_entrar";
-            this.button_entrar.Size = new System.Drawing.Size(151, 49);
+            this.button_entrar.Size = new System.Drawing.Size(113, 40);
             this.button_entrar.TabIndex = 6;
             this.button_entrar.Text = "Entrar";
             this.button_entrar.UseVisualStyleBackColor = true;
@@ -88,23 +83,21 @@
             // 
             // button_registo
             // 
-            this.button_registo.Location = new System.Drawing.Point(52, 314);
-            this.button_registo.Margin = new System.Windows.Forms.Padding(4);
+            this.button_registo.Location = new System.Drawing.Point(39, 255);
             this.button_registo.Name = "button_registo";
-            this.button_registo.Size = new System.Drawing.Size(151, 49);
+            this.button_registo.Size = new System.Drawing.Size(113, 40);
             this.button_registo.TabIndex = 7;
             this.button_registo.Text = "Registar";
             this.button_registo.UseVisualStyleBackColor = true;
-            this.button_registo.Click += new System.EventHandler(this.button2_Click);
+            this.button_registo.Click += new System.EventHandler(this.button_registo_Click);
             // 
             // lb_alert
             // 
             this.lb_alert.AutoSize = true;
             this.lb_alert.ForeColor = System.Drawing.SystemColors.HotTrack;
-            this.lb_alert.Location = new System.Drawing.Point(111, 276);
-            this.lb_alert.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lb_alert.Location = new System.Drawing.Point(83, 224);
             this.lb_alert.Name = "lb_alert";
-            this.lb_alert.Size = new System.Drawing.Size(0, 17);
+            this.lb_alert.Size = new System.Drawing.Size(0, 13);
             this.lb_alert.TabIndex = 8;
             // 
             // lb_title
@@ -112,9 +105,10 @@
             this.lb_title.AutoSize = true;
             this.lb_title.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lb_title.Font = new System.Drawing.Font("Monotype Corsiva", 48F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lb_title.Location = new System.Drawing.Point(46, 32);
+            this.lb_title.Location = new System.Drawing.Point(34, 26);
+            this.lb_title.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lb_title.Name = "lb_title";
-            this.lb_title.Size = new System.Drawing.Size(309, 99);
+            this.lb_title.Size = new System.Drawing.Size(248, 81);
             this.lb_title.TabIndex = 9;
             this.lb_title.Text = "The Chat";
             // 
@@ -123,17 +117,18 @@
             this.label1.AutoSize = true;
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label1.Font = new System.Drawing.Font("Monotype Corsiva", 19.8F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(117, 6);
+            this.label1.Location = new System.Drawing.Point(88, 5);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(171, 43);
+            this.label1.Size = new System.Drawing.Size(138, 35);
             this.label1.TabIndex = 10;
             this.label1.Text = "Welcome to";
             // 
             // Login
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 396);
+            this.ClientSize = new System.Drawing.Size(316, 328);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lb_title);
             this.Controls.Add(this.lb_alert);
@@ -143,9 +138,8 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.textbox_password);
             this.Controls.Add(this.textbox_username);
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximumSize = new System.Drawing.Size(438, 443);
-            this.MinimumSize = new System.Drawing.Size(438, 443);
+            this.MaximumSize = new System.Drawing.Size(332, 367);
+            this.MinimumSize = new System.Drawing.Size(332, 367);
             this.Name = "Login";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login";
