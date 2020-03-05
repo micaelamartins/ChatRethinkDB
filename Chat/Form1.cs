@@ -29,7 +29,6 @@ namespace Chat
             List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
 
 
-            DataTable dt = new DataTable();
             //Load all previous messages to the listbox of messages
             foreach (var message in all_messages)
             {
