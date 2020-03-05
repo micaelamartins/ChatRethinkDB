@@ -32,7 +32,6 @@ namespace Chat
             List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
 
 
-            DataTable dt = new DataTable();
             //Load all previous messages to the listbox of messages
             foreach (var message in all_messages)
             {
@@ -82,9 +81,11 @@ namespace Chat
                     Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text };
 
                     //Writing the message on the Listbox
-                    lb_chat.Items.Add(mensagem);
-                    lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
-                    lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
+                    if (lb_chat.Items.Count != 0)
+                    {
+                        lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
+                        lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
+                    }
 
                     //Writing the message on the Database    
                     r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text }).Run(pool);
