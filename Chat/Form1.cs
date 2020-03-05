@@ -3,10 +3,8 @@ using System.Data;
 using System.Windows.Forms;
 using RethinkDb.Driver;
 using RethinkDb.Driver.Net.Clustering;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Chat
 {
@@ -22,10 +20,9 @@ namespace Chat
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //Stablish connection to RethinkDB Server that is running on Raspberr
+            //Stablish connection to RethinkDB Server that is running on Raspberry
             var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
             conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
-
             pool = conn.Connect();
 
             //Get all messages from RethinkDB
@@ -37,20 +34,14 @@ namespace Chat
             foreach (var message in all_messages)
             {
                 //Create message
-                string msgem = "(" + message.Data + ") " + message.Username + ": " + message.Msg;
+                Mensagem msg = new Mensagem(message.Id, message.Data, message.Username, message.Msg);
                 //Adding Message to Listbox
-                lb_chat.Items.Add(msgem);
+                lb_chat.Items.Add(msg);
             }
-
-            //Scroll to the last entry
-            if (lb_chat.Items.Count != 0)
-            {
-                lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
-                lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
-            }
+            focus_last_message();
 
             //Calling and running the task
-            Task.Run(() => HandleUpdates(pool,lb_chat));
+            Task.Run(() => HandleUpdates(pool, lb_chat));
         }
 
 
@@ -80,11 +71,7 @@ namespace Chat
                     string message_text = tb_mensagem.Text;
                     //Creating a message
                     Mensagem mensagem = new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text };
-
-                    //Writing the message on the Listbox
-                    lb_chat.Items.Add(mensagem);
-                    lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
-                    lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
+                    focus_last_message();
 
                     //Writing the message on the Database    
                     r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text }).Run(pool);
@@ -95,11 +82,7 @@ namespace Chat
                 }
             }
         }
-        private void lb_chat_DoubleClick(object sender, EventArgs e)
-        {
-            //Check if message was sent by user
-            //Allows to delete
-        }
+        //Waits for changes in the database and updates the listbox with new messages
         public static async Task HandleUpdates(ConnectionPool pool, ListBox lb_chat)
         {
             //Create a feed that waits for a new message to reach the database
@@ -107,19 +90,61 @@ namespace Chat
             //Take the feed and create a message
             foreach (var message in feed)
             {
+                if (message.NewValue != null)
+                {
+                    Mensagem msg = new Mensagem(message.NewValue.Id, message.NewValue.Data, message.NewValue.Username, message.NewValue.Msg);
+                    try
+                    {
+                        //Invoke listbox from the Form to the thread to be able to use it
+                        lb_chat.Invoke(new Action(() => lb_chat.Items.Add(msg)));
+                        if (lb_chat.Items.Count != 0)
+                        {
+                            lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, true)));
+                            lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, false)));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Erro");
+                    }
+                }
+                else
+                {
+                    lb_chat.Invoke(new Action(() => lb_chat.Items.Remove(lb_chat.SelectedItem)));
+                }
                 //Create message
-                string msgem = "(" + message.NewValue.Data + ") " + message.NewValue.Username + ": " + message.NewValue.Msg;
-                try
+            }
+        }
+        //Selecting a message from the listbox to delete
+        private void lb_chat_DoubleClick(object sender, EventArgs e)
+        {
+            //Checks if selected item has a message
+            if (lb_chat.SelectedItem != null)
+            {
+                //Check if message was sent by user
+                Mensagem msg = lb_chat.SelectedItem as Mensagem;
+                //Allows to delete if message belongs to user
+                if (msg.Username == lb_username.Text)
                 {
-                    //Invoke listbox from the Form to the thread to be able to use it
-                    lb_chat.Invoke(new Action(() => lb_chat.Items.Add(msgem)));
-                    lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, true)));
-                    lb_chat.Invoke(new Action(() => lb_chat.SetSelected(lb_chat.Items.Count - 1, false)));
+                    DialogResult dialogResult = MessageBox.Show("Are you sure you want to delete this message?" + "\n" + "\n" + msg.Username + ": " + msg.Msg, "DELETE MESSAGE", MessageBoxButtons.YesNo);
+
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        //Deletes message from database and listbox
+                        r.Db("chat").Table("chattable").Get(msg.Id).Delete().Run(pool);
+
+                    }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+            }
+        }
+
+        //Focus on the last message (this is for the listbox to automaticly scroll down to the last message)
+        public void focus_last_message()
+        {
+            if (lb_chat.Items.Count != 0)
+            {
+                lb_chat.SetSelected(lb_chat.Items.Count - 1, true);
+                lb_chat.SetSelected(lb_chat.Items.Count - 1, false);
             }
         }
     }

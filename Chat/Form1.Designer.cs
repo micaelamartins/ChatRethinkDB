@@ -108,6 +108,7 @@
             this.Controls.Add(this.lb_chat);
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(559, 666);
             this.MinimumSize = new System.Drawing.Size(559, 666);
             this.Name = "Form1";
             this.Text = "Form1";

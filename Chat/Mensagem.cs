@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Chat
 {
     public partial class Mensagem
 
     {
+        public String Id;
         public DateTime Data;
         public String Msg;
         public String Username;
@@ -19,17 +16,17 @@ namespace Chat
            
         }
 
-        public Mensagem(DateTime data, String mensagem, String username)
+        public Mensagem(String id, DateTime data, String username, String mensagem)
         {
+            Id= id;
             Data = data;
             Msg = mensagem;
             Username = username;
-
         }
 
         public override string ToString()
         {
-            return "( " +Data+" ): "+ Username + ": " + Msg;
+            return "( " +Data+" ) "+ Username + ": " + Msg;
         }
     }
 }
