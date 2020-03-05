@@ -8,12 +8,12 @@ using System.Collections.Generic;
 
 namespace Chat
 {
-    public partial class Form1 : Form
+    public partial class Chat : Form
     {
         public static RethinkDB r = RethinkDB.R;
         public ConnectionPool pool;
 
-        public Form1()
+        public Chat()
         {
             InitializeComponent();
         }

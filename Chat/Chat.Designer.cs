@@ -1,6 +1,6 @@
 ﻿namespace Chat
 {
-    partial class Form1
+    partial class Chat
     {
         /// <summary>
         /// Required designer variable.
@@ -95,7 +95,7 @@
             this.tb_username.Size = new System.Drawing.Size(132, 22);
             this.tb_username.TabIndex = 6;
             // 
-            // Form1
+            // Chat
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -110,7 +110,8 @@
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(559, 666);
             this.MinimumSize = new System.Drawing.Size(559, 666);
-            this.Name = "Form1";
+            this.Name = "Chat";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
