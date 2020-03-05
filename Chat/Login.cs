@@ -51,7 +51,9 @@ namespace Chat
                 {
                     cont = true;
                     Chat ga = new Chat(textbox_username.Text);
+                    this.Hide();
                     ga.ShowDialog();
+                   this.Close();
                     break;
                 }
 
@@ -108,7 +110,7 @@ namespace Chat
 
 
                 r.Db("chat").Table("users").Insert(new Users { Username = username, Password = result }).Run(pool);
-                lb_alert.Text = result;
+                lb_alert.Text = "Registo efetuado com sucesso";
             }
         }
     }
