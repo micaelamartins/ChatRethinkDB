@@ -5,6 +5,7 @@ using RethinkDb.Driver;
 using RethinkDb.Driver.Net.Clustering;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Chat
 {
@@ -22,30 +23,45 @@ namespace Chat
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //Stablish connection to RethinkDB Server that is running on Raspberry
-            var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
-            conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
-            pool = conn.Connect();
 
-            //Get all messages from RethinkDB
-            List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
-            
-
-
-
-            //Load all previous messages to the listbox of messages
-            foreach (var message in all_messages)
+            try
             {
-                //Create message
-                Mensagem msg = new Mensagem(message.Id, message.Data, message.Username, message.Msg);
-                //Adding Message to Listbox
-                lb_chat.Items.Add(msg);
-            }
-            focus_last_message();
+                for (int i = 0; i < 10; i++) {
+                    //Stablish connection to RethinkDB Server that is running on Raspberry
+                    var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
+                    conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
+                    pool = conn.Connect();
+                   
+                    Thread.Sleep(1000);
+                 }
 
-            //Calling and running the task
-            Task.Run(() => HandleUpdates(pool, lb_chat));
-        }
+               
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Não Há conexão!");
+            }
+
+                //Get all messages from RethinkDB
+            List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
+                
+
+
+
+                //Load all previous messages to the listbox of messages
+                foreach (var message in all_messages)
+                {
+                    //Create message
+                    Mensagem msg = new Mensagem(message.Id, message.Data, message.Username, message.Msg);
+                    //Adding Message to Listbox
+                    lb_chat.Items.Add(msg);
+                }
+                focus_last_message();
+
+                //Calling and running the task
+                Task.Run(() => HandleUpdates(pool, lb_chat));
+            }
+        
 
 
         private void Textbox_KeyDown(object sender, KeyEventArgs e)
@@ -74,8 +90,23 @@ namespace Chat
                     Mensagem mensagem = new Mensagem { Data = DateTime.Now,  Msg = message_text };
                     focus_last_message();
 
-                    //Writing the message on the Database    
-                    r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username= username, Msg = message_text }).Run(pool);
+                    try
+                    {
+                        
+                            //Writing the message on the Database    
+                            r.Db("chat").Table("chattable").Insert(new Mensagem { Data = DateTime.Now, Username = username, Msg = message_text }).Run(pool);
+
+                           
+                        
+
+
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Trying to Reconnect...");
+                        Form1_Load(sender, e);
+                    }
+                    
 
                     //Clean up
                     tb_mensagem.Text = "";
