@@ -23,6 +23,8 @@ namespace Chat
         public Login()
         {
             InitializeComponent();
+            textbox_password.UseSystemPasswordChar = true;
+
         }
 
         //Login
@@ -40,35 +42,58 @@ namespace Chat
 
             string result = System.Text.Encoding.UTF8.GetString(hash);
 
-            List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
-            bool cont = false;
+            try {
+                List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
+                bool cont = false;
 
-            foreach (var us in all_users)
-            {
-                string use = us.Username;
-                string pwd = us.Password;
-                if (use.ToString().Equals(textbox_username.Text) && pwd.ToString().Equals(result))
+                foreach (var us in all_users)
                 {
-                    cont = true;
-                    Chat ga = new Chat(textbox_username.Text);
-                    this.Hide();
-                    ga.ShowDialog();
-                   this.Close();
-                    break;
-                }
+                    string use = us.Username;
+                    string pwd = us.Password;
+                    if (use.ToString().Equals(textbox_username.Text) && pwd.ToString().Equals(result))
+                    {
+                        cont = true;
+                        Chat ga = new Chat(textbox_username.Text);
+                        this.Hide();
+                        ga.ShowDialog();
+                        this.Close();
+                        break;
+                    }
 
+                }
+                if (cont == false)
+                {
+                    MessageBox.Show("Dados incorretos ou não está Registado!");
+                }
             }
-            if (cont == false)
+            catch(Exception ex)
             {
-                MessageBox.Show("Dados incorretos ou não está Registado!");
+                Login_Load(sender, e);
             }
+            
         }
 
         private void Login_Load(object sender, EventArgs e)
         {
-            var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
-            conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
-            pool = conn.Connect();
+            try
+
+            {
+                lb_alert.Text = "Trying to Reconnect...";
+
+                for (int i = 0; i < 10; i++) {
+                    var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
+                    conn.PoolingStrategy(new EpsilonGreedyHostPool(new TimeSpan(0, 1, 0), EpsilonCalculator.Linear())).Discover(true);
+                    pool = conn.Connect();
+
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                lb_alert.Text = "Impossible to Connect";
+            }
+           
+
         }
 
 
@@ -86,32 +111,44 @@ namespace Chat
             }
             string result = System.Text.Encoding.UTF8.GetString(hash);
 
-            List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
+           
 
-            bool cont = true;
-
-            foreach (var us in all_users)
+            try
             {
-
-                string use = us.Username;
-
-                if (use.ToString().Equals(textbox_username.Text))
+                lb_alert.Text = "Connected!";
+               
+                List<Users> all_users = r.Db("chat").Table("users").OrderBy("Username").Run<List<Users>>(pool);
+                bool cont = true;
+                foreach (var us in all_users)
                 {
-                
-                    cont = false;
-                    MessageBox.Show("Ja existe o Username!");
+                   
+                    string use = us.Username;
 
-                    break;
+                    if (use.ToString().Equals(textbox_username.Text))
+                    {
+
+                        cont = false;
+                        MessageBox.Show("Ja existe o Username!");
+
+                        break;
+                    }
                 }
-            }
+                if (cont == true)
+                {
 
-            if (cont == true)
+
+                    r.Db("chat").Table("users").Insert(new Users { Username = username, Password = result }).Run(pool);
+                    lb_alert.Text = "Registo efetuado com sucesso";
+                }
+
+            }
+            catch(Exception ex)
             {
-
-
-                r.Db("chat").Table("users").Insert(new Users { Username = username, Password = result }).Run(pool);
-                lb_alert.Text = "Registo efetuado com sucesso";
+                Login_Load(sender, e);
             }
+           
+
+           
         }
     }
 }

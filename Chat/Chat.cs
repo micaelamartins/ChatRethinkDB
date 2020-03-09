@@ -19,13 +19,17 @@ namespace Chat
             InitializeComponent();
             lb_username.Text = text;
             
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
             try
+
             {
+               
+
                 for (int i = 0; i < 10; i++) {
                     //Stablish connection to RethinkDB Server that is running on Raspberry
                     var conn = r.ConnectionPool().Seed(new[] { "192.168.0.184:28015", "192.168.1.202:28015", "192.168.1.189:28015" });
@@ -34,15 +38,20 @@ namespace Chat
                    
                     Thread.Sleep(1000);
                  }
+                
 
                
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Não Há conexão!");
+                MessageBox.Show("Impossible to Connect!");
             }
 
-                //Get all messages from RethinkDB
+            tb_mensagem.Text ="";
+            
+
+
+            //Get all messages from RethinkDB
             List<Mensagem> all_messages = r.Db("chat").Table("chattable").OrderBy("Data").Run<List<Mensagem>>(pool);
                 
 
@@ -103,7 +112,8 @@ namespace Chat
                     }
                     catch(Exception ex)
                     {
-                        MessageBox.Show("Trying to Reconnect...");
+                        tb_mensagem.Text = "Trying to Reconnect...";
+
                         Form1_Load(sender, e);
                     }
                     
